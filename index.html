@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Warung Bu Nanin - AR Menu 3D from Sketchfab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Inter', 'Segoe UI', sans-serif; background: #e6f0e6; color: #1f3d2b; }
+
+        .navbar { display: flex; justify-content: space-between; padding: 20px 60px; background: #dbe9d8; flex-wrap: wrap; align-items: center; }
+        .navbar h2 { font-weight: bold; font-size: 24px; }
+        .nav-links a { margin: 0 15px; text-decoration: none; color: #1f3d2b; font-weight: 500; transition: color 0.2s; }
+        .nav-links a:hover { color: #2f5d3a; }
+        .nav-links { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+
+        .hero { display: flex; align-items: center; justify-content: space-between; padding: 60px; background: #dbe9d8; flex-wrap: wrap; gap: 30px; }
+        .hero-text h1 { font-size: 48px; margin-bottom: 20px; }
+        .hero-text p { margin-bottom: 20px; font-size: 18px; }
+
+        .btn { 
+            padding: 12px 28px; 
+            background: #2f5d3a; 
+            color: white; 
+            border: none; 
+            border-radius: 40px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn:hover { background: #1f3d2b; transform: scale(1.02); }
+        
+        .btn-location {
+            background: #ff8800;
+            margin-left: 12px;
+        }
+        .btn-location:hover { background: #e07700; }
+
+        .hero-img { position: relative; }
+        .hero-img::before {
+            content: ""; position: absolute; width: 380px; height: 380px;
+            background: #cfe3cf; border-radius: 50%; z-index: -1; top: -15px; left: -15px;
+        }
+        .hero-img img {
+            width: 350px; height: 350px; border-radius: 50%; object-fit: cover;
+            border: 6px solid #f2f7f2; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .products { padding: 60px; text-align: center; }
+        .products h2 { margin-bottom: 30px; font-size: 32px; }
+        .product-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 25px; }
+        @media (max-width: 1000px) { .product-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 600px) { .product-grid { grid-template-columns: 1fr; } }
+
+        .card {
+            background: #f2f7f2; padding: 15px; border-radius: 24px;
+            overflow: hidden; transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .card:hover { transform: scale(1.05) translateY(-6px); box-shadow: 0 18px 30px rgba(0,0,0,0.12); }
+
+        .card img {
+            width: 100%; border-radius: 18px; height: 170px; object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        .card:hover img { transform: scale(1.03); }
+        .card h4 { margin-top: 12px; font-size: 18px; }
+        .card p { color: #2f5d3a; font-weight: 600; margin-top: 6px; }
+
+        .about { padding: 60px; text-align: center; background: #f2f7f2; }
+        .about h2 { margin-bottom: 20px; }
+        .about p { max-width: 700px; margin: 10px auto; line-height: 1.8; }
+
+        .footer { background: #1f3d2b; padding: 60px 60px 30px; }
+        .footer-content {
+            display: flex; justify-content: space-between; flex-wrap: wrap;
+            color: white; gap: 30px;
+        }
+        .footer-box { flex: 1; min-width: 200px; text-align: center; }
+
+        .logo {
+            width: 80px; height: 80px; border-radius: 50%;
+            object-fit: cover; border: 3px solid #ffffff; margin-bottom: 10px;
+        }
+
+        .footer a { 
+            display: block; 
+            color: #cfe3cf; 
+            text-decoration: none; 
+            margin-top: 6px;
+            transition: color 0.2s;
+        }
+        .footer a:hover { color: #ffcc00; }
+        .footer-bottom { text-align: center; margin-top: 40px; color: #cfe3cf; }
+
+        /* AR Modal untuk Sketchfab Embed */
+        #arModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 1000;
+            flex-direction: column;
+        }
+        .ar-iframe-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        .ar-iframe-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .close-ar {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            border: none;
+            border-radius: 40px;
+            padding: 12px 20px;
+            font-size: 16px;
+            z-index: 20;
+            cursor: pointer;
+            font-weight: bold;
+            backdrop-filter: blur(4px);
+        }
+        .close-ar:hover { background: rgba(200,0,0,0.8); }
+        
+        .ar-instruction {
+            position: absolute;
+            bottom: 30px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 12px;
+            font-size: 14px;
+            z-index: 20;
+            backdrop-filter: blur(8px);
+        }
+        .info-panel-ar {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            padding: 12px 18px;
+            color: white;
+            max-width: 280px;
+            z-index: 20;
+            border-left: 4px solid #ffcc00;
+            font-size: 13px;
+            pointer-events: none;
+        }
+        .info-panel-ar h4 { margin: 0 0 4px; font-size: 18px; color: #ffcc00; }
+        .info-panel-ar p { margin: 4px 0; font-size: 12px; }
+        .calorie-badge { background: #ff8800; display: inline-block; padding: 2px 10px; border-radius: 30px; font-size: 11px; font-weight: bold; }
+        
+        @media (max-width: 600px) {
+            .navbar { padding: 15px 20px; }
+            .hero { padding: 30px; }
+            .products { padding: 30px; }
+            .info-panel-ar { max-width: 85%; top: 70px; left: 10px; right: 10px; }
+            .ar-instruction { font-size: 11px; bottom: 20px; }
+            .hero-text .btn { display: inline-block; margin-bottom: 10px; }
+            .btn-location { margin-left: 0; margin-top: 10px; }
+        }
+        
+        /* Lokasi badge */
+        .location-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(47, 93, 58, 0.1);
+            padding: 8px 16px;
+            border-radius: 40px;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        .location-badge span { font-size: 16px; }
+        .location-link {
+            color: #2f5d3a;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .location-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <h2>🍲 Warung Bu Nanin</h2>
+    <div class="nav-links">
+        <a href="#home">Home</a>
+        <a href="#menu">Menu</a>
+        <a href="#about">About</a>
+        <a href="#kontak">Kontak</a>
+    </div>
+</nav>
+
+<section class="hero" id="home">
+    <div class="hero-text">
+        <h1>Selamat Datang di<br>Warung Bu Nanin</h1>
+        <p>Nikmati makanan khas Indonesia dengan cita rasa autentik.</p>
+        <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center;">
+            <a href="https://wa.me/6282288672625" target="_blank"><button class="btn">💬 Pesan Sekarang</button></a>
+            <button class="btn btn-location" onclick="openLocation()">📍 Lihat Lokasi Kami</button>
+        </div>
+    </div>
+    <div class="hero-img">
+        <img src="logo warung.png" alt="Warung Bu Nanin" onerror="this.src='https://placehold.co/350x350?text=Warung+Bu+Nanin'">
+    </div>
+</section>
+
+<div class="products" id="menu">
+    <h2>🍽️ Klik Menu untuk Lihat AR 3D</h2>
+    <div class="product-grid">
+        <!-- Pecel Ulek - Kupat Tahu (Indonesian vegan Food) -->
+        <div class="card" data-menu="pecel" 
+             data-name="Pecel Ulek / Kupat Tahu"
+             data-price="10000"
+             data-ingredients="Kacang tanah, sayuran rebus (bayam, kangkung, tauge), sambal pecel, daun jeruk, petis udang, tempe goreng."
+             data-calories="420 kkal"
+             data-sketchfab="https://sketchfab.com/models/32e48f1c44f54c3daf59f45ec25283ef/embed?autostart=1&ui_ar=1&ui_infos=0&ui_controls=1&ui_stop=0&ui_annotations=0&ui_settings=0&ui_inspector=0&ui_vr=0&ui_fullscreen=0&ui_watermark=0">
+            <img src="pecel.jfif" alt="Pecel Ulek" onerror="this.src='https://placehold.co/300x170?text=Pecel'">
+            <h4>Pecel Ulek</h4>
+            <p>Rp 10.000</p>
+        </div>
+        
+        <!-- Lontong Sayur - Lontong -->
+        <div class="card" data-menu="lontong" 
+             data-name="Lontong Sayur"
+             data-price="12000"
+             data-ingredients="Lontong, sayur labu siam, kacang panjang, tempe, tahu, santan kelapa, daun salam, bawang goreng."
+             data-calories="510 kkal"
+             data-sketchfab="https://sketchfab.com/models/105107cf93484f088e1e5cc92ed4ab15/embed?autostart=1&ui_ar=1&ui_infos=0&ui_controls=1&ui_stop=0&ui_annotations=0&ui_settings=0&ui_inspector=0&ui_vr=0&ui_fullscreen=0&ui_watermark=0">
+            <img src="lontong sayur.jfif" alt="Lontong Sayur" onerror="this.src='https://placehold.co/300x170?text=Lontong+Sayur'">
+            <h4>Lontong Sayur</h4>
+            <p>Rp 12.000</p>
+        </div>
+        
+        <!-- Nasi Lemak - Nasi Lemak -->
+        <div class="card" data-menu="nasi_lemak" 
+             data-name="Nasi Lemak"
+             data-price="15000"
+             data-ingredients="Nasi wangi santan, ayam goreng, sambal terasi, telur rebus, timun, kacang, ikan bilis."
+             data-calories="680 kkal"
+             data-sketchfab="https://sketchfab.com/models/bf9523fd601a4eaeb58921ad221dc34c/embed?autostart=1&ui_ar=1&ui_infos=0&ui_controls=1&ui_stop=0&ui_annotations=0&ui_settings=0&ui_inspector=0&ui_vr=0&ui_fullscreen=0&ui_watermark=0">
+            <img src="nasi uduk.jfif" alt="Nasi Lemak" onerror="this.src='https://placehold.co/300x170?text=Nasi+Lemak'">
+            <h4>Nasi Lemak</h4>
+            <p>Rp 15.000</p>
+        </div>
+        
+        <!-- Nasi Kuning - Indonesian Food Nasi Kuning -->
+        <div class="card" data-menu="nasi_kuning" 
+             data-name="Nasi Kuning"
+             data-price="14000"
+             data-ingredients="Nasi kuning berbumbu kunyit, serundeng, telur dadar, perkedel, emping, sambal bawang."
+             data-calories="590 kkal"
+             data-sketchfab="https://sketchfab.com/models/f27028761014436bb4da925616fdb298/embed?autostart=1&ui_ar=1&ui_infos=0&ui_controls=1&ui_stop=0&ui_annotations=0&ui_settings=0&ui_inspector=0&ui_vr=0&ui_fullscreen=0&ui_watermark=0">
+            <img src="nasi kuning.jfif" alt="Nasi Kuning" onerror="this.src='https://placehold.co/300x170?text=Nasi+Kuning'">
+            <h4>Nasi Kuning</h4>
+            <p>Rp 14.000</p>
+        </div>
+        
+        <!-- Gado-Gado - Gado Gado Indonesian Salad -->
+        <div class="card" data-menu="gado" 
+             data-name="Gado-Gado"
+             data-price="13000"
+             data-ingredients="Sayuran rebus (kentang, buncis, tauge, kol), tahu, tempe, telur, lontong, bumbu kacang kental."
+             data-calories="470 kkal"
+             data-sketchfab="https://sketchfab.com/models/985d026be89f4975bc0bfbe62c807e89/embed?autostart=1&ui_ar=1&ui_infos=0&ui_controls=1&ui_stop=0&ui_annotations=0&ui_settings=0&ui_inspector=0&ui_vr=0&ui_fullscreen=0&ui_watermark=0">
+            <img src="Gado Gado.jfif" alt="Gado-Gado" onerror="this.src='https://placehold.co/300x170?text=Gado-Gado'">
+            <h4>Gado-Gado</h4>
+            <p>Rp 13.000</p>
+        </div>
+    </div>
+</div>
+
+<div class="about" id="about">
+    <h2>Tentang Kami</h2>
+    <p>Warung Bu Nanin merupakan tempat sarapan sejak 2012 dan favorit banyak pelanggan.</p>
+    <p style="margin-top: 15px;">
+    </p>
+</div>
+
+<footer class="footer" id="kontak">
+    <div class="footer-content">
+        <div class="footer-box">
+            <img src="logo warung.png" class="logo" alt="logo" onerror="this.src='https://placehold.co/80x80?text=Nanin'">
+            <p>Warung Bu Nanin</p>
+        </div>
+        <div class="footer-box">
+            <h3>📍 Alamat</h3>
+            <a href="#" onclick="openLocation(); return false;">Lihat Lokasi Kami di Maps</a>
+        </div>
+        <div class="footer-box">
+            <h3>💬 Terima Pesanan</h3>
+            <a href="https://wa.me/6282288672625" target="_blank">Chat WhatsApp</a>
+        </div>
+    </div>
+    <div class="footer-bottom">© 2026 Warung Bu Nanin - AR Menu 3D from Sketchfab</div>
+</footer>
+
+<!-- AR Modal untuk Sketchfab Embed -->
+<div id="arModal">
+    <div class="ar-iframe-container" id="arIframeContainer"></div>
+    <button class="close-ar" onclick="closeAR()">✕ Tutup AR</button>
+    <div id="arInfoPanel" class="info-panel-ar">
+        <!-- dinamis dari menu -->
+    </div>
+</div>
+
+<script>
+    // Link Google Maps
+    const GOOGLE_MAPS_URL = "https://maps.app.goo.gl/Sh9L8Qp7dRmByRuu8";
+    
+    // Fungsi untuk membuka lokasi
+    function openLocation() {
+        window.open(GOOGLE_MAPS_URL, '_blank');
+    }
+    
+    // Data Menu lengkap dengan semua embed Sketchfab
+    const menuDatabase = {
+        pecel: {
+            name: "Pecel Ulek",
+            price: 10000,
+            ingredients: "Kacang tanah, sayuran rebus (bayam, kangkung, tauge), sambal pecel, daun jeruk, petis udang, tempe goreng.",
+            calories: "420 kkal",
+            sketchfabUrl: "https://sketchfab.com/models/32e48f1c44f54c3daf59f45ec25283ef/embed?autostart=1&ui_ar=1&ui_infos=0&ui_controls=1&ui_stop=0&ui_annotations=0&ui_settings=0&ui_inspector=0&ui_vr=0&ui_fullscreen=0&ui_watermark=0"
+        },
+        lontong: {
+            name: "Lontong Sayur",
+            price: 12000,
+            ingredients: "Lontong, sayur labu siam, kacang panjang, tempe, tahu, santan kelapa, daun salam, bawang goreng.",
+            calories: "510 kkal",
+            sketchfabUrl: "https://sketchfab.com/models/105107cf93484f088e1e5cc92ed4ab15/embed?autostart=1&ui_ar=1&ui_infos=0&ui_controls=1&ui_stop=0&ui_annotations=0&ui_settings=0&ui_inspector=0&ui_vr=0&ui_fullscreen=0&ui_watermark=0"
+        },
+        nasi_lemak: {
+            name: "Nasi Lemak",
+            price: 15000,
+            ingredients: "Nasi wangi santan, ayam goreng, sambal terasi, telur rebus, timun, kacang, ikan bilis.",
+            calories: "680 kkal",
+            sketchfabUrl: "https://sketchfab.com/models/bf9523fd601a4eaeb58921ad221dc34c/embed?autostart=1&ui_ar=1&ui_infos=0&ui_controls=1&ui_stop=0&ui_annotations=0&ui_settings=0&ui_inspector=0&ui_vr=0&ui_fullscreen=0&ui_watermark=0"
+        },
+        nasi_kuning: {
+            name: "Nasi Kuning",
+            price: 14000,
+            ingredients: "Nasi kuning berbumbu kunyit, serundeng, telur dadar, perkedel, emping, sambal bawang.",
+            calories: "590 kkal",
+            sketchfabUrl: "https://sketchfab.com/models/f27028761014436bb4da925616fdb298/embed?autostart=1&ui_ar=1&ui_infos=0&ui_controls=1&ui_stop=0&ui_annotations=0&ui_settings=0&ui_inspector=0&ui_vr=0&ui_fullscreen=0&ui_watermark=0"
+        },
+        gado: {
+            name: "Gado-Gado",
+            price: 13000,
+            ingredients: "Sayuran rebus (kentang, buncis, tauge, kol), tahu, tempe, telur, lontong, bumbu kacang kental.",
+            calories: "470 kkal",
+            sketchfabUrl: "https://sketchfab.com/models/985d026be89f4975bc0bfbe62c807e89/embed?autostart=1&ui_ar=1&ui_infos=0&ui_controls=1&ui_stop=0&ui_annotations=0&ui_settings=0&ui_inspector=0&ui_vr=0&ui_fullscreen=0&ui_watermark=0"
+        }
+    };
+    
+    const arModal = document.getElementById('arModal');
+    const arIframeContainer = document.getElementById('arIframeContainer');
+    const arInfoPanel = document.getElementById('arInfoPanel');
+    
+    function updateInfoPanel(menu) {
+        arInfoPanel.innerHTML = `
+            <h4>🍲 ${menu.name}</h4>
+            <p><strong>🥗 Bahan:</strong> ${menu.ingredients}</p>
+            <p><strong>🔥 Kalori:</strong> <span class="calorie-badge">${menu.calories}</span></p>
+            <p><strong>💰 Harga:</strong> Rp ${menu.price.toLocaleString()}</p>
+        `;
+    }
+    
+    function startSketchfabAR(menuKey) {
+        const menu = menuDatabase[menuKey];
+        if (!menu || !menu.sketchfabUrl) return;
+        
+        // Bersihkan container
+        while (arIframeContainer.firstChild) {
+            arIframeContainer.removeChild(arIframeContainer.firstChild);
+        }
+        
+        // Update info panel
+        updateInfoPanel(menu);
+        arInfoPanel.style.display = 'block';
+        
+        // Buat iframe untuk embed Sketchfab
+        const iframe = document.createElement('iframe');
+        iframe.setAttribute('src', menu.sketchfabUrl);
+        iframe.setAttribute('allow', 'autoplay; fullscreen; vr; xr-spatial-tracking');
+        iframe.setAttribute('allowfullscreen', 'true');
+        iframe.setAttribute('frameborder', '0');
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        
+        arIframeContainer.appendChild(iframe);
+    }
+    
+    async function openAR(menuKey) {
+        const menu = menuDatabase[menuKey];
+        if (!menu) return;
+        
+        arModal.style.display = 'flex';
+        startSketchfabAR(menuKey);
+    }
+    
+    function closeAR() {
+        arModal.style.display = 'none';
+        // Bersihkan container
+        while (arIframeContainer.firstChild) {
+            arIframeContainer.removeChild(arIframeContainer.firstChild);
+        }
+    }
+    
+    // Global function untuk close button dan location
+    window.closeAR = closeAR;
+    window.openLocation = openLocation;
+    
+    // Event listener untuk card menu
+    document.querySelectorAll('.card').forEach(card => {
+        card.addEventListener('click', (e) => {
+            const menuKey = card.getAttribute('data-menu');
+            if (menuKey && menuDatabase[menuKey]) {
+                openAR(menuKey);
+            }
+        });
+    });
+    
+    console.log("%c✅ Warung Bu Nanin AR siap! Semua menu menggunakan Sketchfab Embed.", "color: green; font-size: 14px");
+    console.log("Menu tersedia: Pecel (Kupat Tahu), Lontong, Nasi Lemak, Nasi Kuning, Gado-Gado");
+    console.log("📍 Lokasi: Klik tombol lokasi untuk membuka Google Maps");
+    console.log("💡 Tips: Klik tombol [🔲] di pojok kanan bawah iframe untuk masuk mode AR");
+</script>
+</body>
+</html>
